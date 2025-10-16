@@ -24,7 +24,8 @@ php artisan route:cache
 # Esegui migrazioni solo in ambienti non di produzione
 if [ "$APP_ENV" != "production" ]; then
   echo "🛠️  Migrazioni e seeding (env: $APP_ENV)..."
-  php artisan migrate --seed --force
+  #php artisan migrate --seed --force
+  php artisan migrate:status | tail -n 2 | grep -q 'Ran' || php artisan migrate --seed --force
 else
   echo "🔒 Ambiente production: migrazioni disabilitate"
 fi

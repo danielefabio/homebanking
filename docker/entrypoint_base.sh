@@ -17,7 +17,7 @@ echo "✅ Database is ready!"
 
 # Esegui le migrazioni
 echo "🚀 Running migrations..."
-php artisan migrate:status | grep 'Yes' || php artisan migrate --seed --force
+php artisan migrate:status | grep 'Pending' | tail -n 1 | grep -q 'Pending' && php artisan migrate --seed --force
 
 # Avvia Apache
 exec apache2-foreground

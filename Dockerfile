@@ -13,12 +13,14 @@ RUN apt-get update && \
     libpng-dev \
     libicu-dev \
     libpq-dev \
-    libmagickwand-dev
+    libmagickwand-dev \
+    iproute2
 
 RUN docker-php-ext-install pdo_mysql zip exif pcntl bcmath gd
 
 # Abilita mod_rewrite per Apache (necessario per le route di Laravel)
 RUN a2enmod rewrite
+#RUN a2enmod proxy proxy_http
 
 # Sovrascrive il file di configurazione di Apache per puntare a /var/www/html/public
 #RUN sed -i 's!/var/www/html!/var/www/html/public!g' /etc/apache2/sites-available/000-default.conf
@@ -48,4 +50,4 @@ EXPOSE 80
 
 COPY docker/entrypoint.sh /usr/local/bin/entrypoint.sh
 RUN chmod +x /usr/local/bin/entrypoint.sh
-ENTRYPOINT ["/usr/local/bin/entrypoint.sh"]
+#ENTRYPOINT ["/usr/local/bin/entrypoint.sh"]

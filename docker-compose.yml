@@ -3,13 +3,12 @@ services:
     build: .
     container_name: home_banking
     ports:
-      - "8000:80"
+      - "80:80"
     volumes:
       #- app_data:/var/www/html
       - ./:/var/www/html
     depends_on:
       - db
-    #command: ["php", "artisan", "migrate", "--seed"]
     environment:
       DB_HOST: db
       DB_USER: hbdbus4er
@@ -23,10 +22,12 @@ services:
       MAIL_ENCRYPTION: null
       MAIL_FROM_ADDRESS: "noreply@homebanking.com"
       MAIL_FROM_NAME: "Home Banking"
+    entrypoint: ["/usr/local/bin/entrypoint.sh"]
 
   db:
     image: mysql:8.0
     container_name: mysql_db
+    restart: unless-stopped
     ports:
       - "3306:3306"
     environment:
