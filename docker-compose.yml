@@ -1,0 +1,59 @@
+services:
+  app:
+    build: .
+    container_name: home_banking
+    ports:
+      - "80:80"
+    volumes:
+      #- app_data:/var/www/html
+      - ./:/var/www/html
+    depends_on:
+      - db
+    environment:
+      DB_HOST: db
+      DB_USER: hbdbus4er
+      DB_PASSWORD: "xSg4v_Oi2u3t!A"
+      DB_NAME: hbdb_01
+      MAIL_MAILER: smtp
+      MAIL_HOST: mailhog
+      MAIL_PORT: 1025
+      MAIL_USERNAME: null
+      MAIL_PASSWORD: null
+      MAIL_ENCRYPTION: null
+      MAIL_FROM_ADDRESS: "noreply@homebanking.com"
+      MAIL_FROM_NAME: "Home Banking"
+    entrypoint: ["/usr/local/bin/entrypoint.sh"]
+
+  db:
+    image: mysql:8.0
+    container_name: mysql_db
+    restart: unless-stopped
+    ports:
+      - "3306:3306"
+    environment:
+      MYSQL_ROOT_PASSWORD: "XdfR5!u61"
+      MYSQL_DATABASE: hbdb_01
+    volumes:
+      - db_data:/var/lib/mysql
+      - ./init.sql:/docker-entrypoint-initdb.d/init.sql
+
+  composer:
+    image: composer:2
+    container_name: composer_runner
+    volumes:
+      - ./:/app
+    working_dir: /app
+    command: ["composer", "install"]
+
+  mailhog:
+    image: mailhog/mailhog
+    container_name: mailhog
+    ports:
+      - "8025:8025"   # interfaccia web
+      - "1025:1025"   # server SMTP
+
+
+
+volumes:
+  db_data:
+  #app_data:

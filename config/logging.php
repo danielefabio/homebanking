@@ -52,9 +52,24 @@ return [
 
     'channels' => [
 
+        'deprecations' => [
+            'driver' => 'single',
+            'path' => storage_path('logs/deprecations.log'),
+            'level' => env('LOG_LEVEL', 'debug'),
+            'replace_placeholders' => true,
+        ],
+
+        'mail' => [
+            'driver' => 'mail',
+            'level' => env('LOG_LEVEL_FOR_MAIL', 'error'),
+            'to' => env('LOG_MAIL_TO_ADDRESS'),
+            'from' => env('LOG_MAIL_FROM_ADDRESS', 'errorlog@homebanking.com'),
+            'subject' => env('LOG_MAIL_SUBJECT', 'HB Error Log'),
+        ],
+
         'stack' => [
             'driver' => 'stack',
-            'channels' => explode(',', (string) env('LOG_STACK', 'single')),
+            'channels' => explode(',', (string) env('LOG_STACK', 'daily')),
             'ignore_exceptions' => false,
         ],
 
