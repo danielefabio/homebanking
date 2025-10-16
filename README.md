@@ -41,14 +41,14 @@ HomeBanking è un progetto personale creato per esercitarsi con architetture sof
 
 ## Tech stack
 
-- Backend: PHP 8.4, Laravel 12
+- Backend: PHP 8.3, Laravel 12
 - Database: MySQL / SQLite (per sviluppo/test)
 - Frontend: Blade + Vite (opzionale: React/Vue per SPA)
 - Code style & tools: PHPStan, Pest/PHPUnit, Pint, GitHub Actions
 
 ## Requisiti locali
 
-- PHP >= 8.2 con estensioni PDO
+- PHP >= 8.3 con estensioni PDO
 - Composer
 - Node.js + npm (per asset)
 - MySQL o SQLite
