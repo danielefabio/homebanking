@@ -4,9 +4,11 @@ services:
     container_name: home_banking
     ports:
       - "80:80"
+      # - "5173:5173"  # Vite HMR
     volumes:
-      #- app_data:/var/www/html
-      - ./:/var/www/html
+      # - ./:/var/www/html  # Monta il codice sorgente
+      - /home/dani958/dev/laravel/home_banking:/var/www/html # WSL2 
+    restart: unless-stopped
     depends_on:
       - db
     environment:
@@ -23,6 +25,23 @@ services:
       MAIL_FROM_ADDRESS: "noreply@homebanking.com"
       MAIL_FROM_NAME: "Home Banking"
     entrypoint: ["/usr/local/bin/entrypoint.sh"]
+    #networks:
+    #  - laravel
+
+    
+  vite:
+    image: node:20
+    container_name: vite_dev_server
+    working_dir: /var/www/html
+    volumes:
+      - /home/dani958/dev/laravel/home_banking:/var/www/html
+      - /home/dani958/dev/laravel/home_banking/node_modules:/var/www/html/node_modules
+    ports:
+      - "5173:5173"
+    command: sh -c "npm ci && npm run dev"
+    #networks:
+    #  - laravel
+
 
   db:
     image: mysql:8.0
@@ -57,3 +76,7 @@ services:
 volumes:
   db_data:
   #app_data:
+
+#networks:
+#  laravel:
+#    driver: bridge
