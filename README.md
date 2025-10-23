@@ -53,51 +53,92 @@ HomeBanking è un progetto personale creato per esercitarsi con architetture sof
 - Node.js + npm (per asset)
 - MySQL o SQLite
 
-## Setup rapido (Windows PowerShell)
+## Setup rapido
 
 1) Clona il repository e posizionati nella cartella del progetto
 
-```powershell
-git clone https://github.com/danielefabio/homebanking.git
-cd homebanking
-```
-
-- PER DOCKER
-	2) Lancia il comando per creare i vari container e volume:
-
-	```powershell
-	docker-compose up -d --build
+	```bash
+	git clone https://github.com/danielefabio/homebanking.git
+	cd homebanking
 	```
 
-- IN LOCALE
 
-	2) Installa le dipendenze PHP e Node
+- ### PER DOCKER
+	
+	<div style="border: 1px solid #666; border-radius: 8px; padding: 8px 16px; margin-bottom: 8px">
+	<h4 style="color: orange">SOLO AMBIENTE WINDOWS</h4>
 
-	```powershell
-	composer install --no-interaction --prefer-dist
-	npm install
-	```
+	Configurare l'ambiente di sviluppo con WSL per una maggiore compatibilità e performarce:
 
-	3) Configura l'ambiente
+	- Installare WSL2 dal Windows store
+	- Installare una distro dallo store (ad esempio Ubuntu)
+	- Aprire il prompt dei comandi per impostare la distro di default per WSL:
 
-	```powershell
-	cp .env.example .env
-	# personalizza .env (DB, MAIL, ecc.)
-	php artisan key:generate
-	```
+		```bash
+		wsl --set-default Ubuntu
+		```
 
-	4) Crea il database e applica le migration
+	- Entrare in WSL e copiare la cartella del progetto:
 
-	```powershell
-	php artisan migrate --seed
-	```
+		```bash
+		wsl
+		mkdir /home/il-tuo-nome/dev/laravel/
+		cp -r /mnt/percorso/del/progetto/ /home/il-tuo-nome/dev/laravel/
+		```
 
-	5) Avvia l'app in sviluppo
+	- Aggiungere i permessi alle cartelle storage e bootstrap/cache:
+		
+		```bash
+		chmod -R 775 storage bootstrap/cache
+		```
 
-	```powershell
-	npm run dev
-	php artisan serve --host=127.0.0.1 --port=8000
-	```
+	- Configurare Docker per utilizzare il WSL come risorsa:
+				
+		<img src="./docker/screenshot_docker_settings_wsl_integration.png" alt="screenshot delle impostazioni di Docker per attivare la integrazione WSL con la distro">
+	</div>
+
+	2) 
+		- Aprire il file docker-compose.yml
+		- Sostituire /home/dani958/dev/laravel/home_banking con il percorso del vostro progetto
+
+	3) Creare i vari container e volume:
+		```bash
+		docker-compose up -d --build
+		```
+
+- ### IN LOCALE
+
+	2) 
+		- Eliminare il file vite.config.js
+		- Rinominare il file vite.config.local.js in vite.config.js
+
+	3) Installare le dipendenze PHP e Node
+
+		```bash
+		composer install --no-interaction --prefer-dist
+		npm install
+		```
+
+	4) Configurare l'ambiente
+
+		```bash
+		cp .env.example .env
+		# personalizza .env (DB, MAIL, ecc.)
+		php artisan key:generate
+		```
+
+	5) Creare il database e applica le migration
+
+		```bash
+		php artisan migrate --seed
+		```
+
+	6) Avvia l'app in sviluppo
+
+		```bash
+		npm run dev
+		php artisan serve --host=127.0.0.1 --port=8000
+		```
 
 Visita http://127.0.0.1:8000
 
@@ -105,7 +146,7 @@ Visita http://127.0.0.1:8000
 
 - Tests (Pest / PHPUnit)
 
-```powershell
+```bash
 ./vendor/bin/pest
 # oppure su Windows se ci sono .bat
 vendor\bin\pest.bat
@@ -113,7 +154,7 @@ vendor\bin\pest.bat
 
 - Analisi statica
 
-```powershell
+```bash
 ./vendor/bin/phpstan analyse
 ```
 

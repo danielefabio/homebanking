@@ -1,29 +1,25 @@
 import { defineConfig } from 'vite';
 import laravel from 'laravel-vite-plugin';
+import path from 'path';
 import tailwindcss from '@tailwindcss/vite';
 
 export default defineConfig({
     plugins: [
         laravel({
             input: ['resources/css/app.css', 'resources/js/app.js'],
-            refresh: true, // basta questo, non serve elencare manualmente
+            refresh: true,
         }),
         tailwindcss(),
     ],
     server: {
-        host: true, // necessario per WSL2
+        host: '127.0.0.1',
         port: 5173,
         strictPort: true,
-        watch: {
-            usePolling: true,
-            interval: 100,
-        },
         hmr: {
-            host: 'hb01.local', // deve essere lo stesso dominio che usi nel browser
+            host: '127.0.0.1',
             protocol: 'ws',
             port: 5173,
         },
-        allowedHosts: ['hb01.local'],
-        cacheDir: '/var/www/html/node_modules/.vite', // assicura che la cache sia persistente
+        cacheDir: path.resolve(__dirname, 'node_modules/.vite'),
     },
 });
