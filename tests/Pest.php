@@ -30,6 +30,10 @@ expect()->extend('toBeOne', function () {
     return $this->toBe(1);
 });
 
+expect()->extend('toBeNotNull', function () {
+    return $this->not->toBeNull();
+});
+
 /*
 |--------------------------------------------------------------------------
 | Functions

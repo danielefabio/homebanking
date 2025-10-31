@@ -1,0 +1,11 @@
+user default off
+
+user ${REDIS_CACHE_USERNAME} on >${REDIS_CACHE_PASSWORD} ~cache:* +select +get +set +setex +del +exists +expire +ttl +incr +decr
+
+user ${REDIS_SESSION_USERNAME} on >${REDIS_SESSION_PASSWORD} ~session:* +select +set +get +setex +del +expire +ttl
+
+user ${REDIS_QUEUE_USERNAME} on >${REDIS_QUEUE_PASSWORD} ~queue:* +select +xadd +xread +xack +xdel +xlen +xrange +xtrim +set
+
+user ${REDIS_RATELIMIT_USERNAME} on >${REDIS_RATELIMIT_PASSWORD} ~ratelimit:* +select +incr +expire +pttl +set +get
+
+user ${REDIS_ROOT_USERNAME} on >${REDIS_ROOT_PASSWORD} ~* +@all

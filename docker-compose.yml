@@ -1,21 +1,35 @@
 services:
   app:
-    build: .
+    build: 
+      context: .
+      dockerfile: Dockerfile
+      target: php_app
     container_name: home_banking
     ports:
-      - "80:80"
-      # - "5173:5173"  # Vite HMR
+      - "${APP_PORT}:${APP_PORT}"
     volumes:
       # - ./:/var/www/html  # Monta il codice sorgente
       - /home/dani958/dev/laravel/home_banking:/var/www/html # WSL2 
     restart: unless-stopped
     depends_on:
-      - db
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      mongodb:
+        condition: service_healthy
+      vite:
+        condition: service_healthy
     environment:
+      .env: /var/www/html/.env
+      APP_ENV: ${APP_ENV}
       DB_HOST: db
-      DB_USER: hbdbus4er
-      DB_PASSWORD: "xSg4v_Oi2u3t!A"
-      DB_NAME: hbdb_01
+      DB_MIGRATION_USERNAME: ${DB_MIGRATION_USERNAME}
+      DB_MIGRATION_PASSWORD_FILE: /run/secrets/db_migration_password
+      DB_DATABASE: ${DB_DATABASE}
+      DB_ROOT_PASSWORD_FILE: /run/secrets/db_root_password
+      DB_USERNAME: ${DB_USERNAME}
+      DB_PASSWORD_FILE: /run/secrets/db_app_password
       MAIL_MAILER: smtp
       MAIL_HOST: mailhog
       MAIL_PORT: 1025
@@ -24,9 +38,17 @@ services:
       MAIL_ENCRYPTION: null
       MAIL_FROM_ADDRESS: "noreply@homebanking.com"
       MAIL_FROM_NAME: "Home Banking"
-    entrypoint: ["/usr/local/bin/entrypoint.sh"]
     #networks:
     #  - laravel
+    secrets:
+      - db_root_password
+      - db_app_password
+      - db_migration_password
+    healthcheck:
+      test: ["CMD", "curl", "-s", "${APP_URL}"] 
+      interval: 30s
+      timeout: 5s
+      retries: 3
 
     
   vite:
@@ -37,10 +59,17 @@ services:
       - /home/dani958/dev/laravel/home_banking:/var/www/html
       - /home/dani958/dev/laravel/home_banking/node_modules:/var/www/html/node_modules
     ports:
-      - "5173:5173"
+      - "${VITE_PORT}:${VITE_PORT}"
     command: sh -c "npm ci && npm run dev"
     #networks:
     #  - laravel
+    healthcheck:
+      test: ["CMD-SHELL", "curl -i ${VITE_URL} | grep Vite"] 
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s   # try to increase this value
+                          # if status is not healthy
 
 
   db:
@@ -48,19 +77,99 @@ services:
     container_name: mysql_db
     restart: unless-stopped
     ports:
-      - "3306:3306"
+      - "${DB_PORT}:${DB_PORT}"
     environment:
-      MYSQL_ROOT_PASSWORD: "XdfR5!u61"
-      MYSQL_DATABASE: hbdb_01
+      MYSQL_DATABASE: ${DB_DATABASE}
+      MYSQL_ROOT_PASSWORD_FILE: /run/secrets/db_root_password
+      MYSQL_USER: ${DB_MIGRATION_USERNAME}
+      MYSQL_PASSWORD_FILE: /run/secrets/db_migration_password
+      MYSQL_APP_USER: ${DB_USERNAME}
+      MYSQL_APP_PASSWORD_FILE: /run/secrets/db_app_password
+      #MYSQL_MIGRATION_USER: ${DB_MIGRATION_USERNAME}
+      #MYSQL_MIGRATION_PASSWORD_FILE: /run/secrets/db_migration_password
     volumes:
-      - db_data:/var/lib/mysql
-      - ./init.sql:/docker-entrypoint-initdb.d/init.sql
+      - mysql_data:/var/lib/mysql
+      - ./docker/compose/setup_mysql.sh:/docker-entrypoint-initdb.d/setup_mysql.sh
+    secrets:
+      - db_root_password
+      - db_migration_password
+      - db_app_password
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-uroot", "-prootpass"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+
+
+  mongodb:
+    image: mongo:6
+    container_name: mongodb_server
+    restart: unless-stopped
+    ports:
+      - "${MONGODB_PORT}:${MONGODB_PORT}"
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: ${MONGODB_ROOT_USERNAME}
+      MONGO_INITDB_ROOT_PASSWORD_FILE: /run/secrets/mongodb_root_password
+      MONGO_INITDB_DATABASE: ${MONGODB_DATABASE}
+      MONGO_USER: ${MONGODB_USERNAME}
+      MONGO_PASSWORD_FILE: /run/secrets/mongodb_password
+      MONGO_DATABASE: ${MONGODB_DATABASE}
+    volumes:
+      - mongo_data:/data/db
+      - ./docker/compose/init_mongo.sh:/docker-entrypoint-initdb.d/init_mongo.sh:ro
+    secrets:
+      - mongodb_root_password
+      - mongodb_password
+    healthcheck:
+      test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+
+
+  redis:
+    #image: redis:7
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: redis_server
+    container_name: redis_server
+    restart: unless-stopped
+    ports:
+      - "${REDIS_PORT}:${REDIS_PORT}"
+    environment:
+      REDIS_ROOT_USERNAME: ${REDIS_ROOT_USERNAME}
+      REDIS_ROOT_PASSWORD_FILE: /run/secrets/redis_root_password
+      REDIS_CACHE_USERNAME: ${REDIS_CACHE_USERNAME}
+      REDIS_CACHE_PASSWORD_FILE: /run/secrets/redis_cache_password
+      REDIS_SESSION_USERNAME: ${REDIS_SESSION_USERNAME}
+      REDIS_SESSION_PASSWORD_FILE: /run/secrets/redis_session_password
+      REDIS_QUEUE_USERNAME: ${REDIS_QUEUE_USERNAME}
+      REDIS_QUEUE_PASSWORD_FILE: /run/secrets/redis_queue_password
+      REDIS_RATELIMIT_USERNAME: ${REDIS_RATELIMIT_USERNAME}
+      REDIS_RATELIMIT_PASSWORD_FILE: /run/secrets/redis_ratelimit_password
+    volumes:
+      - redis_data:/data
+      - ./docker/compose/init_redis.sh:/docker-entrypoint-initdb.d/init_redis.sh:ro
+      - ./docker/compose/redis_users.acl.template:/var/tmp/users.acl.template
+    secrets:
+      - redis_root_password
+      - redis_cache_password
+      - redis_session_password
+      - redis_queue_password
+      - redis_ratelimit_password
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+
 
   composer:
     image: composer:2
     container_name: composer_runner
     volumes:
-      - ./:/app
+      - /home/dani958/dev/laravel/home_banking:/app
     working_dir: /app
     command: ["composer", "install"]
 
@@ -69,14 +178,41 @@ services:
     container_name: mailhog
     ports:
       - "8025:8025"   # interfaccia web
-      - "1025:1025"   # server SMTP
-
+      - "${MAIL_PORT}:${MAIL_PORT}"   # server SMTP
 
 
 volumes:
-  db_data:
-  #app_data:
+  mysql_data:
+  redis_data:
+  mongo_data:
 
 #networks:
 #  laravel:
 #    driver: bridge
+
+secrets:
+  db_root_password:
+    environment: DB_ROOT_PASSWORD
+    #file: ./docker/secrets/db_root_password.txt
+  db_migration_password:
+    environment: DB_MIGRATION_PASSWORD
+    #file: ./docker/secrets/db_migration_password.txt
+  db_app_password:
+    environment: DB_PASSWORD
+    #file: ./docker/secrets/db_app_password.txt
+  mongodb_password:
+    environment: MONGODB_PASSWORD
+  mongodb_root_password:
+    environment: MONGODB_ROOT_PASSWORD
+  redis_password:
+    environment: REDIS_PASSWORD
+  redis_root_password:
+    environment: REDIS_ROOT_PASSWORD
+  redis_cache_password:
+    environment: REDIS_CACHE_PASSWORD
+  redis_session_password:
+    environment: REDIS_SESSION_PASSWORD
+  redis_queue_password:
+    environment: REDIS_QUEUE_PASSWORD
+  redis_ratelimit_password:
+    environment: REDIS_RATELIMIT_PASSWORD
