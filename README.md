@@ -1,20 +1,27 @@
-<!--
-	README per il progetto: homebanking
-	Scopo: file in italiano, strutturato e gradevole, per guidare lo sviluppo e l'apprendimento
--->
-
 <p align="center">
 	<img src="https://raw.githubusercontent.com/danielefabio/homebanking/main/assets/logo-placeholder.png" alt="HomeBanking" width="280" style="max-width:100%;">
 </p>
 
 <p align="center">
 	<a href="https://github.com/danielefabio/homebanking/actions"><img src="https://img.shields.io/github/actions/workflow/status/danielefabio/homebanking/ci.yml?label=CI&logo=github" alt="CI"></a>
-	<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/badge/framework-Laravel-red" alt="Laravel"></a>
-	<a href="https://www.php.net/"><img src="https://img.shields.io/badge/php-%3E=%208.1-777bb4" alt="PHP"></a>
+	<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/badge/framework-Laravel_12-red" alt="Laravel"></a>
+	<a href="https://www.php.net/"><img src="https://img.shields.io/badge/php-%3E=%208.3-777bb4" alt="PHP"></a>
 	<a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-brightgreen" alt="License"></a>
 </p>
 
-## HomeBanking — Progetto didattico
+-----
+
+<style>
+	H1{ color:#0ACDFF; }
+	H2{ color:#ffffff; }
+	H3{ color:#ff58a1; }
+	H4{ color:#FF8800; }
+	p{ color: white; }
+	li{ color: white; }
+</style>
+
+
+# HomeBanking — Progetto didattico
 
 HomeBanking è un progetto personale creato per esercitarsi con architetture software, problem solving, sicurezza applicativa e le funzionalità tipiche di una applicazione bancaria: gestione utenti, conti, transazioni, pagamenti e reportistica. L'obiettivo non è solo far funzionare le feature, ma imparare a progettare componenti manutenibili, testabili e sicure.
 
@@ -42,7 +49,7 @@ HomeBanking è un progetto personale creato per esercitarsi con architetture sof
 ## Tech stack
 
 - Backend: PHP 8.3, Laravel 12
-- Database: MySQL / SQLite (per sviluppo/test)
+- Database: MySQL + Redis + MongoDB
 - Frontend: Blade + Vite (opzionale: React/Vue per SPA)
 - Code style & tools: PHPStan, Pest/PHPUnit, Pint, GitHub Actions
 
@@ -51,7 +58,7 @@ HomeBanking è un progetto personale creato per esercitarsi con architetture sof
 - PHP >= 8.3 con estensioni PDO
 - Composer
 - Node.js + npm (per asset)
-- MySQL o SQLite
+- MySQL + Redis + MongoDB
 
 ## Setup rapido
 
@@ -62,24 +69,31 @@ HomeBanking è un progetto personale creato per esercitarsi con architetture sof
 	cd homebanking
 	```
 
+2) Configurare l'ambiente
 
-- ### PER DOCKER
-	
-	<div style="border: 1px solid #666; border-radius: 8px; padding: 8px 16px; margin-bottom: 8px">
-	<h4 style="color: orange">SOLO AMBIENTE WINDOWS</h4>
+	```bash
+	cp .env.example .env
+	# personalizza .env (DB, MAIL, ecc.)
+	php artisan key:generate
+	```
 
-	Configurare l'ambiente di sviluppo con WSL per una maggiore compatibilità e performarce:
+3) Docker o Locale?
+
+	### Configurazione per Docker
+
+	----------
+	#### SOLO AMBIENTE WINDOWS
+
+	Configurare l'ambiente di sviluppo con WSL per una maggiore compatibilità e performance:
 
 	- Installare WSL2 dal Windows store
 	- Installare una distro dallo store (ad esempio Ubuntu)
 	- Aprire il prompt dei comandi per impostare la distro di default per WSL:
-
 		```bash
 		wsl --set-default Ubuntu
 		```
 
 	- Entrare in WSL e copiare la cartella del progetto:
-
 		```bash
 		wsl
 		mkdir /home/il-tuo-nome/dev/laravel/
@@ -87,53 +101,45 @@ HomeBanking è un progetto personale creato per esercitarsi con architetture sof
 		```
 
 	- Aggiungere i permessi alle cartelle storage e bootstrap/cache:
-		
 		```bash
 		chmod -R 775 storage bootstrap/cache
 		```
 
-	- Configurare Docker per utilizzare il WSL come risorsa:
+	- Abilitare l'integrazione WSL in Docker:
 				
-		<img src="./docker/screenshot_docker_settings_wsl_integration.png" alt="screenshot delle impostazioni di Docker per attivare la integrazione WSL con la distro">
-	</div>
+		![docker_settings_wsl_integration](./docker/screenshot_docker_settings_wsl_integration.png)
 
-	2) 
-		- Aprire il file docker-compose.yml
-		- Sostituire /home/dani958/dev/laravel/home_banking con il percorso del vostro progetto
+	----------
+			
 
-	3) Creare i vari container e volume:
+	- Nel file docker-compose.yml sostituire il percorso `/home/dani958/dev/laravel/home_banking` con quello del vostro progetto
+
+	- Creare i vari container e volume:
 		```bash
 		docker-compose up -d --build
 		```
 
-- ### IN LOCALE
 
-	2) 
+	### Istruzioni per il Locale
+
+	- 
 		- Eliminare il file vite.config.js
 		- Rinominare il file vite.config.local.js in vite.config.js
 
-	3) Installare le dipendenze PHP e Node
+	- Installare le dipendenze PHP e Node
 
 		```bash
 		composer install --no-interaction --prefer-dist
 		npm install
 		```
 
-	4) Configurare l'ambiente
-
-		```bash
-		cp .env.example .env
-		# personalizza .env (DB, MAIL, ecc.)
-		php artisan key:generate
-		```
-
-	5) Creare il database e applica le migration
+	- Creare il database e applica le migration
 
 		```bash
 		php artisan migrate --seed
 		```
 
-	6) Avvia l'app in sviluppo
+	- Avvia l'app in sviluppo
 
 		```bash
 		npm run dev

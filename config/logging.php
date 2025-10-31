@@ -60,7 +60,7 @@ return [
         ],
 
         'mail' => [
-            'driver' => 'mail',
+            'driver' => 'monolog',
             'level' => env('LOG_LEVEL_FOR_MAIL', 'error'),
             'to' => env('LOG_MAIL_TO_ADDRESS'),
             'from' => env('LOG_MAIL_FROM_ADDRESS', 'errorlog@homebanking.com'),

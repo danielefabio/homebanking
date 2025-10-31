@@ -75,6 +75,9 @@ return [
 
     'connection' => env('SESSION_CONNECTION'),
 
+    /* Session prefix for Redis */
+    'prefix' => env('REDIS_SESSION_PREFIX', 'session:'),
+
     /*
     |--------------------------------------------------------------------------
     | Session Database Table

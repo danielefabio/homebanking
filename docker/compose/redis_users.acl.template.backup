@@ -1,0 +1,21 @@
+# Utente di default (disabilitato per sicurezza)
+user default off
+
+# Utente applicativo per cache/sessioni
+user ${REDIS_USERNAME} on >${REDIS_PASSWORD} ~session:* ~cache:* ~ratelimit:* ~queue:* +get +set +del +expire +incr +decr +lpush +rpush +lpop +rpop +xadd +xread +select
+
+
+# Cache user
+user cacheuser on >cachepass ~cache:* +select +get +set +setex +del +exists +expire +ttl +incr +decr
+
+# Session user
+user sessionuser on >sessionpass ~session:* +select +set +get +setex +del +expire +ttl
+
+# Queue user (stream-based)
+user queueuser on >queuepass ~queue:* +select +set +get +xadd +xread +xack +xdel +xlen +xrange +xtrim
+
+# Rate limiter user
+user ratelimituser on >ratepass ~ratelimit:* +select +incr +expire +pttl +set +get
+
+# Utente admin (solo per manutenzione, non usato dall’app)
+user ${REDIS_ROOT_USERNAME} on >${REDIS_ROOT_PASSWORD} ~* +@all

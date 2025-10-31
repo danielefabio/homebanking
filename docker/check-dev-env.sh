@@ -11,8 +11,8 @@ grep -i 'ServerName' /etc/apache2/apache2.conf || echo "❌ ServerName non impos
 echo -e "\n🧾 3. Verifica VirtualHost attivo:"
 apachectl -S | grep hb01.local || echo "❌ VirtualHost hb01.local non attivo"
 
-echo -e "\n🔧 4. Verifica moduli Apache:"
-apachectl -M | grep proxy && apachectl -M | grep proxy_http || echo "❌ Moduli proxy non attivi"
+#echo -e "\n🔧 4. Verifica moduli Apache:"
+#apachectl -M | grep proxy && apachectl -M | grep proxy_http || echo "❌ Moduli proxy non attivi"
 
 echo -e "\n🚀 5. Verifica Laravel in ascolto su porta 8000:"
 curl -s -o /dev/null -w "%{http_code}" http://127.0.0.1:8000 || echo "❌ Laravel non risponde su porta 8000"
